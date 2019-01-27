@@ -40,7 +40,7 @@ int checksum(PACKET *pkt){
 }
 //THREAD 3
 void *thread3(void* temp){//receives costsupdate struct
-	//djsktras algorithm to updat0 1 1 100 
+	
 
 	costsupdate *update=(costsupdate *) temp;
 	int *costsbegin;//address to beginning of costs array
@@ -87,9 +87,7 @@ void *thread3(void* temp){//receives costsupdate struct
 				update->costscol=costsbegin+(minindex-lcbegin);
 				update->costsrow=update->costscol;
 				for(i=0;i< update->MACHINE_SIZE;++i){//update lc to adj vertices
-					//update->costsrow=update->costscol;
-					//update->costsrow+=(i*update->MACHINE_SIZE);
-					//update min(current value, vs dist to this element + dist from this element to i
+					
 					*update->lc=MIN(*update->lc,mindist+*update->costsrow);
 					update->costsrow+=update->MACHINE_SIZE;
 				
@@ -101,16 +99,7 @@ void *thread3(void* temp){//receives costsupdate struct
 			
 		}
 		pthread_mutex_unlock(&lock);		
-/*		
-		printf("updated costs table:\n");
 
-		for(;update->costscol<=costsbegin+3;++update->costscol){
-				update->costsrow=update->costscol;
-				for(;update->costsrow<costsbegin+(update->MACHINE_SIZE*(update->MACHINE_SIZE));update->costsrow+=update->MACHINE_SIZE){
-					printf("%d ",*update->costsrow);	
-				}
-				printf("\n");
-		}*/
 		
 		update->lc=lcbegin;
 		printf("lc after update\n");
@@ -162,20 +151,7 @@ void *thread2(void* temp){
 		
 		//update costs table
 		pthread_mutex_lock(&lock);
-		/*update->costscol=costsbegin;
-		update->costsrow=costsbegin;
-		printf("table before: \n");		
-		for(i=0;i<update->MACHINE_SIZE;++i){
-			update->costsrow=update->costscol;
-			for(j=0;j<update->MACHINE_SIZE;++j){
-				printf("%d ",*update->costsrow);
-				update->costsrow+=update->MACHINE_SIZE;
-			}
-			printf("\n");
-			update->costscol++;
-		}
-		printf("\n");
-*/
+
 		update->costscol=costsbegin;
 		update->costsrow=costsbegin;
 		//update a,b and b,a	
@@ -221,7 +197,6 @@ int main (int argc, char *argv[])
 	costsupdate update;
 	pthread_t uinput;
 	
-	//udp stuff
 	struct sockaddr_in serverAddr[MACHINE_SIZE];
 	socklen_t addr_size[MACHINE_SIZE];
 	PACKET pkt,ack;
@@ -244,10 +219,8 @@ int main (int argc, char *argv[])
 		printf("cant open input file\n");
 		exit(0);
 	}
-	//read in machine values
 	for(i=0;i<MACHINE_SIZE;++i){	
 		fscanf(m,"%s %s %d", machines[i].name, machines[i].ip, &machines[i].port);
-		//printf("machine %d: %s %s %d\n",i,machines[i].name,machines[i].ip,machines[i].port);
 		//read in costs
 		for(j=0;j<MACHINE_SIZE;++j){
 			fscanf(c,"%d",&costs[i][j]);
@@ -270,7 +243,6 @@ int main (int argc, char *argv[])
 
 	printf("machineid: %d\n", ID);
 
-	//printf("%d\n",sizeof(costs[0])/sizeof(int)); <-# of machines
 	//init costsupdate
 	update.costsrow=&costs;
 	update.costscol=&costs;
@@ -298,35 +270,11 @@ int main (int argc, char *argv[])
 	//THREAD 1
 	while(1){//keyboard input and update costs
 
-/*		
-		pthread_mutex_lock(&lock);
-
-		printf("\n current costs table:\n");
-		for(i=0;i<MACHINE_SIZE;++i){	
-		//read in costs
-			for(j=0;j<MACHINE_SIZE;++j){
-				printf("%d ",costs[i][j]);
-				}
-			printf("\n");
-		
-		}
-
-		pthread_mutex_unlock(&lock);
-*/
-		printf("enter changes: machine2 newcost\n");
+	printf("enter changes: machine2 newcost\n");
 		scanf("%d %d",&m2,&nc);//user input
 		m1=ID;
 		pthread_mutex_lock(&lock);
-/*
-		printf("\n current costs table:\n");
-		for(i=0;i<MACHINE_SIZE;++i){	
-		//read in costs
-			for(j=0;j<MACHINE_SIZE;++j){
-				printf("%d ",costs[i][j]);
-				}
-			printf("\n");
-		
-		}*/
+
 			
 		
 		costs[m1][m2]=nc;//update costs table
@@ -334,11 +282,11 @@ int main (int argc, char *argv[])
 	
 		pthread_mutex_unlock(&lock);
 		//create packet
-		pkt.data[0]=m1;//packet.h modie
+		pkt.data[0]=m1;
 		pkt.data[1]=m2;
 		pkt.data[2]=nc;
 		
-		//send packet to all other computers except to itself
+
 		for(i=0;i<MACHINE_SIZE;++i){
 			if(i!=ID){
 				sendto(sock[i],&pkt,sizeof(pkt),0,(struct sockaddr *)&serverAddr[i],addr_size[i]);
